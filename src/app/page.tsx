@@ -1,9 +1,10 @@
 'use client' 
 import Image from "next/image";
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import { useTransactionHistory } from '@/features/transactions/hooks/usetransactionhistory'
 import { TransactionItem } from '@/components/transaction-list/transactionItem'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useDebounce } from '@/hooks/debounce'
 
 export default function Home() {
   const { 
@@ -16,6 +17,46 @@ export default function Home() {
     markAsReviewed,
     isMarkingAsReviewed
   } = useTransactionHistory({ accountId: 'prueba123' })
+
+  // Estados para filtros
+  const [tipo, setTipo] = useState<string>('todos')
+  const [montoMin, setMontoMin] = useState<string>('')
+  const [montoMax, setMontoMax] = useState<string>('')
+  const [busqueda, setBusqueda] = useState<string>('')
+  
+  // Debounce para búsqueda
+  const busquedaDebounced = useDebounce(busqueda, 300)
+
+  // Filtrado de transacciones con useMemo
+  const filteredTransactions = useMemo(() => {
+    let filtered = [...transactions]
+
+    // Filtro por tipo
+    if (tipo !== 'todos') {
+      filtered = filtered.filter(tx => tx.type === tipo)
+    }
+
+    // Filtro por monto mínimo
+    if (montoMin !== '') {
+      const min = parseFloat(montoMin)
+      filtered = filtered.filter(tx => Math.abs(tx.amount) >= min)
+    }
+
+    // Filtro por monto máximo
+    if (montoMax !== '') {
+      const max = parseFloat(montoMax)
+      filtered = filtered.filter(tx => Math.abs(tx.amount) <= max)
+    }
+
+    // Filtro por búsqueda en descripción
+    if (busquedaDebounced !== '') {
+      filtered = filtered.filter(tx => 
+        tx.description.toLowerCase().includes(busquedaDebounced.toLowerCase())
+      )
+    }
+
+    return filtered
+  }, [transactions, tipo, montoMin, montoMax, busquedaDebounced])
 
   const loaderRef = useRef<HTMLDivElement>(null)
 
@@ -51,7 +92,7 @@ export default function Home() {
   }
 
   // Estado vacío
-  if (transactions.length === 0) {
+  if (filteredTransactions.length === 0 && !isLoading) {
     return (
       <main className="p-4 max-w-2xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">FlashBank</h1>
@@ -84,8 +125,51 @@ export default function Home() {
     <main className="p-4 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">FlashBank</h1>
       
+      {/* Filtros */}
+      <div className="mb-6 space-y-3 p-4 bg-gray-50 rounded-lg">
+        <div className="flex gap-4">
+          <select
+            value={tipo}
+            onChange={(e) => setTipo(e.target.value)}
+            className="px-3 py-2 border rounded"
+          >
+            <option value="todos">Todos</option>
+            <option value="credit">Crédito</option>
+            <option value="debit">Débito</option>
+          </select>
+          
+          <input
+            type="number"
+            placeholder="Monto mínimo"
+            value={montoMin}
+            onChange={(e) => setMontoMin(e.target.value)}
+            className="px-3 py-2 border rounded w-32"
+          />
+          
+          <input
+            type="number"
+            placeholder="Monto máximo"
+            value={montoMax}
+            onChange={(e) => setMontoMax(e.target.value)}
+            className="px-3 py-2 border rounded w-32"
+          />
+        </div>
+        
+        <input
+          type="text"
+          placeholder="Buscar por descripción..."
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          className="w-full px-3 py-2 border rounded"
+        />
+        
+        <div className="text-sm text-gray-500">
+          Mostrando {filteredTransactions.length} de {transactions.length} transacciones
+        </div>
+      </div>
+      
       <div className="space-y-3">
-        {transactions.map((tx) => (
+        {filteredTransactions.map((tx) => (
           <TransactionItem
             key={tx.id}
             id={tx.id}
