@@ -12,7 +12,9 @@ export default function Home() {
     error, 
     fetchNextPage, 
     hasNextPage,
-    isFetchingNextPage 
+    isFetchingNextPage,
+    markAsReviewed,
+    isMarkingAsReviewed
   } = useTransactionHistory({ accountId: 'prueba123' })
 
   const loaderRef = useRef<HTMLDivElement>(null)
@@ -92,6 +94,9 @@ export default function Home() {
             status={tx.status}
             description={tx.description}
             createdAt={tx.createdAt}
+            reviewed={tx.reviewed}
+            onMarkAsReviewed={markAsReviewed}
+            isMarking={isMarkingAsReviewed}
           />
         ))}
       </div>

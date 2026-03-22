@@ -5,9 +5,12 @@ interface TransactionItemProps {
   status: 'pending' | 'completed' | 'failed'
   description: string
   createdAt: string
+  reviewed?: boolean
+  onMarkAsReviewed?: (id: string) => void
+  isMarking?: boolean
 }
 
-export function TransactionItem({ amount, type, status, description, createdAt }: TransactionItemProps) {
+export function TransactionItem({ id, amount, type, status, description, createdAt, reviewed, onMarkAsReviewed, isMarking }: TransactionItemProps) {
   // Formatear monto
   const formattedAmount = new Intl.NumberFormat('es-ES', {
     style: 'currency',
@@ -52,6 +55,9 @@ export function TransactionItem({ amount, type, status, description, createdAt }
       <div className="flex-1">
         <p className="font-medium">{description}</p>
         <p className="text-sm text-gray-500">{getRelativeTime(createdAt)}</p>
+         {reviewed && (
+          <span className="text-xs text-blue-500">revisada</span>
+        )}
       </div>
       
       <div className="text-right">
@@ -61,6 +67,16 @@ export function TransactionItem({ amount, type, status, description, createdAt }
         <span className={`text-xs px-2 py-1 rounded-full ${statusColors[status]}`}>
           {statusText[status]}
         </span>
+        {/* Botón para marcar como revisada */}
+        {onMarkAsReviewed && !reviewed && (
+          <button
+            onClick={() => onMarkAsReviewed(id)}
+            disabled={isMarking}
+            className="mt-2 text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+          >
+            {isMarking ? 'Marcando...' : 'Marcar como revisada'}
+          </button>
+        )}
       </div>
     </div>
   )

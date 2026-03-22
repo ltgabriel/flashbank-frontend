@@ -9,6 +9,7 @@ export interface Transaction {
   status: 'pending' | 'completed' | 'failed'
   description: string
   createdAt: string
+  reviewed?: boolean
  }
 // Simularemos datos fijos 
 const mockTransactions: Transaction[] = [
