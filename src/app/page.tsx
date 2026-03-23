@@ -1,6 +1,7 @@
 'use client' 
 import Image from "next/image";
-import { useEffect, useRef, useState, useMemo } from 'react'
+import { useEffect, useRef, useMemo } from 'react'
+import { useQueryState } from 'nuqs'
 import { useTransactionHistory } from '@/features/transactions/hooks/usetransactionhistory'
 import { TransactionItem } from '@/components/transaction-list/transactionItem'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -18,13 +19,15 @@ export default function Home() {
     isMarkingAsReviewed
   } = useTransactionHistory({ accountId: 'prueba123' })
 
-  // Estados para filtros
-  const [tipo, setTipo] = useState<string>('todos')
-  const [montoMin, setMontoMin] = useState<string>('')
-  const [montoMax, setMontoMax] = useState<string>('')
-  const [busqueda, setBusqueda] = useState<string>('')
+  // Filtros con nuqs (se guardan en la URL)
+  const [tipo, setTipo] = useQueryState('tipo', { defaultValue: 'todos' })
+  const [montoMin, setMontoMin] = useQueryState('montoMin', { defaultValue: '' })
+  const [montoMax, setMontoMax] = useQueryState('montoMax', { defaultValue: '' })
+  const [busqueda, setBusqueda] = useQueryState('busqueda', { defaultValue: '' })
+  const [fechaDesde, setFechaDesde] = useQueryState('fechaDesde', { defaultValue: '' })
+  const [fechaHasta, setFechaHasta] = useQueryState('fechaHasta', { defaultValue: '' })
   
-  // Debounce para búsqueda
+  // Debounce solo para búsqueda
   const busquedaDebounced = useDebounce(busqueda, 300)
 
   // Filtrado de transacciones con useMemo
@@ -39,13 +42,29 @@ export default function Home() {
     // Filtro por monto mínimo
     if (montoMin !== '') {
       const min = parseFloat(montoMin)
-      filtered = filtered.filter(tx => Math.abs(tx.amount) >= min)
+      if (!isNaN(min)) {
+        filtered = filtered.filter(tx => Math.abs(tx.amount) >= min)
+      }
     }
 
     // Filtro por monto máximo
     if (montoMax !== '') {
       const max = parseFloat(montoMax)
-      filtered = filtered.filter(tx => Math.abs(tx.amount) <= max)
+      if (!isNaN(max)) {
+        filtered = filtered.filter(tx => Math.abs(tx.amount) <= max)
+      }
+    }
+
+    // Filtro por rango de fechas
+    if (fechaDesde !== '') {
+      const desde = new Date(fechaDesde)
+      filtered = filtered.filter(tx => new Date(tx.createdAt) >= desde)
+    }
+
+    if (fechaHasta !== '') {
+      const hasta = new Date(fechaHasta)
+      hasta.setDate(hasta.getDate() + 1)
+      filtered = filtered.filter(tx => new Date(tx.createdAt) <= hasta)
     }
 
     // Filtro por búsqueda en descripción
@@ -56,7 +75,7 @@ export default function Home() {
     }
 
     return filtered
-  }, [transactions, tipo, montoMin, montoMax, busquedaDebounced])
+  }, [transactions, tipo, montoMin, montoMax, busquedaDebounced, fechaDesde, fechaHasta])
 
   const loaderRef = useRef<HTMLDivElement>(null)
 
@@ -103,7 +122,7 @@ export default function Home() {
     )
   }
 
-  // Error con botón reintentar
+  // Error
   if (error) {
     return (
       <main className="p-4 max-w-2xl mx-auto">
@@ -152,6 +171,24 @@ export default function Home() {
             value={montoMax}
             onChange={(e) => setMontoMax(e.target.value)}
             className="px-3 py-2 border rounded w-32"
+          />
+        </div>
+        
+        <div className="flex gap-4">
+          <input
+            type="date"
+            placeholder="Desde"
+            value={fechaDesde}
+            onChange={(e) => setFechaDesde(e.target.value)}
+            className="px-3 py-2 border rounded"
+          />
+          
+          <input
+            type="date"
+            placeholder="Hasta"
+            value={fechaHasta}
+            onChange={(e) => setFechaHasta(e.target.value)}
+            className="px-3 py-2 border rounded"
           />
         </div>
         
