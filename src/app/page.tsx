@@ -27,19 +27,19 @@ export default function Home() {
   const [fechaDesde, setFechaDesde] = useQueryState('fechaDesde', { defaultValue: '' })
   const [fechaHasta, setFechaHasta] = useQueryState('fechaHasta', { defaultValue: '' })
   
-  // Debounce solo para búsqueda
+  // Debounce solo para busqueda
   const busquedaDebounced = useDebounce(busqueda, 300)
 
-  // Filtrado de transacciones con useMemo
+  // filtrado de transacciones con useMemo
   const filteredTransactions = useMemo(() => {
     let filtered = [...transactions]
 
-    // Filtro por tipo
+    // filtro por tipo
     if (tipo !== 'todos') {
       filtered = filtered.filter(tx => tx.type === tipo)
     }
 
-    // Filtro por monto mínimo
+    // Filtro por monto minimo
     if (montoMin !== '') {
       const min = parseFloat(montoMin)
       if (!isNaN(min)) {
@@ -47,7 +47,7 @@ export default function Home() {
       }
     }
 
-    // Filtro por monto máximo
+    // Filtro por monto maximo
     if (montoMax !== '') {
       const max = parseFloat(montoMax)
       if (!isNaN(max)) {
@@ -67,7 +67,7 @@ export default function Home() {
       filtered = filtered.filter(tx => new Date(tx.createdAt) <= hasta)
     }
 
-    // Filtro por búsqueda en descripción
+    // Filtro por busqueda en descripcion
     if (busquedaDebounced !== '') {
       filtered = filtered.filter(tx => 
         tx.description.toLowerCase().includes(busquedaDebounced.toLowerCase())
@@ -110,7 +110,7 @@ export default function Home() {
     )
   }
 
-  // Estado vacío
+  // Estado vacio
   if (filteredTransactions.length === 0 && !isLoading) {
     return (
       <main className="p-4 max-w-2xl mx-auto">
@@ -131,6 +131,7 @@ export default function Home() {
           <p className="text-red-500 mb-4">Error: {error.message}</p>
           <button
             onClick={() => window.location.reload()}
+            aria-label="Reintentar carga de transacciones"
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
             Reintentar
@@ -150,6 +151,7 @@ export default function Home() {
           <select
             value={tipo}
             onChange={(e) => setTipo(e.target.value)}
+            aria-label="Filtrar por tipo de transacción"
             className="px-3 py-2 border rounded"
           >
             <option value="todos">Todos</option>
@@ -162,6 +164,7 @@ export default function Home() {
             placeholder="Monto mínimo"
             value={montoMin}
             onChange={(e) => setMontoMin(e.target.value)}
+            aria-label="Monto mínimo a filtrar"
             className="px-3 py-2 border rounded w-32"
           />
           
@@ -170,6 +173,7 @@ export default function Home() {
             placeholder="Monto máximo"
             value={montoMax}
             onChange={(e) => setMontoMax(e.target.value)}
+            aria-label="Monto máximo a filtrar"
             className="px-3 py-2 border rounded w-32"
           />
         </div>
@@ -180,6 +184,7 @@ export default function Home() {
             placeholder="Desde"
             value={fechaDesde}
             onChange={(e) => setFechaDesde(e.target.value)}
+            aria-label="Fecha desde"
             className="px-3 py-2 border rounded"
           />
           
@@ -188,6 +193,7 @@ export default function Home() {
             placeholder="Hasta"
             value={fechaHasta}
             onChange={(e) => setFechaHasta(e.target.value)}
+            aria-label="Fecha hasta"
             className="px-3 py-2 border rounded"
           />
         </div>
@@ -197,6 +203,7 @@ export default function Home() {
           placeholder="Buscar por descripción..."
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
+          aria-label="Buscar por descripción"
           className="w-full px-3 py-2 border rounded"
         />
         
