@@ -2,12 +2,13 @@
   "name": "flashbank-frontend",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
+"scripts": {
+  "dev": "next dev",
+  "build": "next build",
+  "start": "next start",
+  "lint": "eslint",
+  "test": "vitest"
+},
   "dependencies": {
     "@tanstack/react-query": "^5.94.5",
     "@tanstack/react-virtual": "^3.13.23",
@@ -33,4 +34,5 @@
     "typescript": "^5",
     "vitest": "^4.1.0"
   }
+  
 }
