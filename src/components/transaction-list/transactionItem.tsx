@@ -17,11 +17,11 @@ export function TransactionItem({ id, amount, type, status, description, created
     currency: 'USD',
   }).format(Math.abs(amount))
 
-  // Color según tipo
+  // Color segun tipo
   const amountColor = type === 'credit' ? 'text-green-600' : 'text-red-600'
   const amountSign = type === 'credit' ? '+' : '-'
 
-  // Color según estado
+  // Color segun estado
   const statusColors = {
     pending: 'bg-yellow-100 text-yellow-800',
     completed: 'bg-green-100 text-green-800',
@@ -30,6 +30,13 @@ export function TransactionItem({ id, amount, type, status, description, created
 
   // Texto según estado
   const statusText = {
+    pending: 'Pendiente',
+    completed: 'Completado',
+    failed: 'Fallido',
+  }
+
+  // Texto para lectores de pantalla
+  const statusAriaLabel = {
     pending: 'Pendiente',
     completed: 'Completado',
     failed: 'Fallido',
@@ -51,30 +58,38 @@ export function TransactionItem({ id, amount, type, status, description, created
   }
 
   return (
-    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+    <div 
+      role="listitem"
+      aria-label={`Transacción: ${description}, ${type === 'credit' ? 'Crédito' : 'Débito'}, ${Math.abs(amount)} dólares, ${statusAriaLabel[status]}`}
+      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+    >
       <div className="flex-1">
         <p className="font-medium">{description}</p>
         <p className="text-sm text-gray-500">{getRelativeTime(createdAt)}</p>
-         {reviewed && (
-          <span className="text-xs text-blue-500">revisada</span>
+        {reviewed && (
+          <span className="text-xs text-blue-500" aria-label="Revisada">✓ revisada</span>
         )}
       </div>
       
       <div className="text-right">
-        <p className={`text-lg font-semibold ${amountColor}`}>
+        <p className={`text-lg font-semibold ${amountColor}`} aria-label={`Monto: ${amountSign} ${formattedAmount}`}>
           {amountSign} {formattedAmount}
         </p>
-        <span className={`text-xs px-2 py-1 rounded-full ${statusColors[status]}`}>
+        <span 
+          className={`text-xs px-2 py-1 rounded-full ${statusColors[status]}`}
+          aria-label={`Estado: ${statusText[status]}`}
+        >
           {statusText[status]}
         </span>
-        {/* Botón para marcar como revisada */}
+        {/* Boton para marcar como revisada */}
         {onMarkAsReviewed && !reviewed && (
           <button
             onClick={() => onMarkAsReviewed(id)}
             disabled={isMarking}
+            aria-label={isMarking ? 'marcando como revisada...' : 'marcar transaccion como revisada'}
             className="mt-2 text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
           >
-            {isMarking ? 'Marcando...' : 'Marcar como revisada'}
+            {isMarking ? 'marcando...' : 'marcar como revisada'}
           </button>
         )}
       </div>
