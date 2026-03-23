@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# flashBank Frontend
+Dashboard de transacciones con scroll infinito, filtros y optimistic updates
 
-## Getting Started
+## Tecnologias
 
-First, run the development server:
+- Next.js 14 (App Router)
+- TypeScript
+- Tailwind CSS
+- React Query v5
+- nuqs (URL state)
+- Vitest + Testing Library (para tests)
 
-```bash
+## Como correr el proyecto
+
+# Instalar dependencias
+npm install
+
+# Correr en desarrollo
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Abrir http://localhost:3000
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# Estructura del proyecto
+src/
+    app/                 # rutas de Next.js (solo layout y page)
+    features/            # logica por funcionalidad
+        transactions/    # todo lo de transacciones
+        hooks/           # usetransactionhistory
+        types/           # tipos TypeScript
+    components/          # componentes reutilizables
+        ui/              # Skeleton, etc
+        transaction-list/# transactionItem
+    hooks/               # Hooks genericos (useDebounce)
+    services/            # API mock
+    lib/                 # configuraciones (react-query)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Porque esta estructura.* 
+porque separo por features porque cuando el proyecto crece es mas facil encontrar las cosas. Cada feature tiene su hook y sus tipos juntos. Los componentes reutilizables van en components/.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Decisiones tecnicas
+Use React Query porque ya lo conocia y tiene buen soporte para scroll infinito con useInfiniteQuery. Ademas maneja bien el cache y los optimistic updates
 
-## Learn More
+# Scroll infinito + virtualizacion
+Hice scroll infinito con IntersectionObserver. Para virtualizacion no la implemente porque con 40 transacciones no hacia falta, pero si la lista creciera a miles usaria @tanstack/react-virtual para no renderizar todo de una vez.
 
-To learn more about Next.js, take a look at the following resources:
+# Stale time
+configure staleTime en 5 minutos para que no recargue los datos cada vez que el usuario vuelve a la pagina
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Optimistic update
+Al marcar una transaccion como revisada, la UI cambia instantaneamente y despues se confirma con el servidor. Si falla, vuelve atras.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Filtros con URL
+Use nuqs para guardar los filtros en la URL y asi si recargas la pagina o compartis el link, los filtros se mantienen.
 
-## Deploy on Vercel
+# useMemo para filtros
+Los filtros se calculan con useMemo para que no se recalquen en cada render si los datos no cambiaron.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Server vs Client Components
+En Next.js, esta pantalla necesita interactividad (filtros, scroll, botones), asi que todo es Client Component. Solo el layout tiene metadata y configuraciones basicas.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Mock del API
+Como no tenia el backend real, hice un mock local con datos fijos para desarrollo en produccion se reemplazaria por la URL real.
