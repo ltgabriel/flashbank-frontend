@@ -24,14 +24,17 @@ src/
     app/                 # rutas de Next.js (solo layout y page)
     features/            # logica por funcionalidad
         transactions/    # todo lo de transacciones
-        hooks/           # usetransactionhistory
-        types/           # tipos TypeScript
+            hooks/       # useTransactionHistory
+            types/       # tipos TypeScript
     components/          # componentes reutilizables
         ui/              # Skeleton, etc
-        transaction-list/# transactionItem
-    hooks/               # Hooks genericos (useDebounce)
+        transaction-list/# TransactionItem
+    hooks/               # hooks genericos (useDebounce)
     services/            # API mock
     lib/                 # configuraciones (react-query)
+    test/                # tests y mocks
+        mocks/           # mocks para tests
+        setup.ts         # configuracion de tests
 
 **Porque esta estructura.* 
 porque separo por features porque cuando el proyecto crece es mas facil encontrar las cosas. Cada feature tiene su hook y sus tipos juntos. Los componentes reutilizables van en components/.
@@ -59,3 +62,19 @@ En Next.js, esta pantalla necesita interactividad (filtros, scroll, botones), as
 
 # Mock del API
 Como no tenia el backend real, hice un mock local con datos fijos para desarrollo en produccion se reemplazaria por la URL real.
+
+# Tests
+
+Para ejecutar los tests:
+
+```bash
+npm test
+```
+Se incluyen:
+
+2 tests unitarios del hook useTransactionHistory
+  Test de configuracion de vitest
+
+Los tests verifican:
+Carga correcta de transacciones
+Manejo de errores en la API
